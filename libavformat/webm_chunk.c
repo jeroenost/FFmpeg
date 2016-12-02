@@ -215,7 +215,7 @@ static int webm_chunk_write_packet(AVFormatContext *s, AVPacket *pkt)
          (pkt->flags & AV_PKT_FLAG_KEY)) ||
         (st->codecpar->codec_type == AVMEDIA_TYPE_AUDIO &&
          (pkt->pts == 0 || wc->duration_written >= wc->chunk_duration))) {
-        wc->duration_written = (pkt->pts == 0) ? 0 : wc->duration_written - wc->chunk_duration;
+        wc->duration_written = 0;
         if ((ret = chunk_end(s)) < 0 || (ret = chunk_start(s)) < 0) {
             goto fail;
         }
