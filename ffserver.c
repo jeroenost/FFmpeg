@@ -495,20 +495,22 @@ static void start_children(FFServerStream *feed)
         return;
     }
 
-    pathname = av_strdup (my_program_name);
+    slash = strrchr(my_program_name, '/');
+    if (!slash) {
+        pathname = av_mallocz(sizeof("ffmpeg"));
+    } else {
+        pathname = av_mallocz(slash - my_program_name + sizeof("ffmpeg"));
+        if (pathname != NULL) {
+            memcpy(pathname, my_program_name, slash - my_program_name);
+        }
+    }
     if (!pathname) {
         http_log("Could not allocate memory for children cmd line\n");
         return;
     }
-   /* replace "ffserver" with "ffmpeg" in the path of current
-    * program. Ignore user provided path */
+   /* use "ffmpeg" in the path of current program. Ignore user provided path */
 
-    slash = strrchr(pathname, '/');
-    if (!slash)
-        slash = pathname;
-    else
-        slash++;
-    strcpy(slash, "ffmpeg");
+    strcat(pathname, "ffmpeg");
 
     for (; feed; feed = feed->next) {
 
@@ -2738,8 +2740,10 @@ static int http_receive_data(HTTPContext *c)
         } else if (c->buffer_ptr - c->buffer >= 2 &&
                    !memcmp(c->buffer_ptr - 1, "\r\n", 2)) {
             c->chunk_size = strtol(c->buffer, 0, 16);
-            if (c->chunk_size == 0) // end of stream
+            if (c->chunk_size <= 0) { // end of stream or invalid chunk size
+                c->chunk_size = 0;
                 goto fail;
+            }
             c->buffer_ptr = c->buffer;
             break;
         } else if (++loop_run > 10)
@@ -2761,6 +2765,7 @@ static int http_receive_data(HTTPContext *c)
             /* end of connection : close it */
             goto fail;
         else {
+            av_assert0(len <= c->chunk_size);
             c->chunk_size -= len;
             c->buffer_ptr += len;
             c->data_count += len;
@@ -2854,7 +2859,8 @@ static int http_receive_data(HTTPContext *c)
             for (i = 0; i < s->nb_streams; i++) {
                 LayeredAVStream *fst = feed->streams[i];
                 AVStream *st = s->streams[i];
-                avcodec_copy_context(fst->codec, st->codec);
+                avcodec_parameters_to_context(fst->codec, st->codecpar);
+                avcodec_parameters_from_context(fst->codecpar, fst->codec);
             }
 
             avformat_close_input(&s);

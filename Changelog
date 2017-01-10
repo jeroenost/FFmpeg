@@ -6,6 +6,13 @@ version <next>:
 - add internal ebur128 library, remove external libebur128 dependency
 - Pro-MPEG CoP #3-R2 FEC protocol
 - premultiply video filter
+- Support for spherical videos
+- configure now fails if autodetect-libraries are requested but not found
+- PSD Decoder
+- 16.8 floating point pcm decoder
+- 24.0 floating point pcm decoder
+- Apple Pixlet decoder
+- QDMC audio decoder
 
 version 3.2:
 - libopenmpt demuxer

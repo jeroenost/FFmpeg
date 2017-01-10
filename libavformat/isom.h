@@ -24,6 +24,12 @@
 #ifndef AVFORMAT_ISOM_H
 #define AVFORMAT_ISOM_H
 
+#include <stddef.h>
+#include <stdint.h>
+
+#include "libavutil/spherical.h"
+#include "libavutil/stereo3d.h"
+
 #include "avio.h"
 #include "internal.h"
 #include "dv.h"
@@ -177,6 +183,10 @@ typedef struct MOVStreamContext {
     int stsd_count;
 
     int32_t *display_matrix;
+    AVStereo3D *stereo3d;
+    AVSphericalMapping *spherical;
+    size_t spherical_size;
+
     uint32_t format;
 
     int has_sidx;  // If there is an sidx entry for this stream.
