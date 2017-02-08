@@ -1,4 +1,4 @@
-///*
+/*
  * Copyright (c) 2015, Vignesh Venkatasubramanian
  *
  * This file is part of FFmpeg.
